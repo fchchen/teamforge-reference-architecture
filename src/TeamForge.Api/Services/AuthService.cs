@@ -2,6 +2,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using TeamForge.Api.Models;
 using TeamForge.Data;
@@ -28,7 +30,7 @@ public class AuthService : IAuthService
             .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
             .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
-        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        if (user is null || user.PasswordHash is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             _logger.LogWarning("Failed login attempt for {Email}", request.Email);
             return null;
@@ -226,4 +228,137 @@ public class AuthService : IAuthService
     {
         return _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
     }
+
+    public async Task<EntraLoginResponse> EntraLoginAsync(string accessToken, CancellationToken cancellationToken = default)
+    {
+        var entraUser = await ValidateEntraTokenAsync(accessToken, cancellationToken);
+
+        var user = await _db.AppUsers
+            .Include(u => u.Tenant)
+            .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.EntraIdObjectId == entraUser.ObjectId, cancellationToken);
+
+        if (user is null)
+        {
+            return new EntraLoginResponse { IsProvisioned = false };
+        }
+
+        user.LastLoginAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync(cancellationToken);
+
+        var roleName = user.UserRoles.FirstOrDefault()?.Role.Name ?? "Member";
+        return new EntraLoginResponse
+        {
+            IsProvisioned = true,
+            Auth = GenerateAuthResponse(user.Id, user.TenantId, user.Email, user.DisplayName,
+                user.Tenant.CompanyName, roleName)
+        };
+    }
+
+    public async Task<AuthResponse> EntraProvisionAsync(string accessToken, string companyName, string displayName, CancellationToken cancellationToken = default)
+    {
+        var entraUser = await ValidateEntraTokenAsync(accessToken, cancellationToken);
+
+        // Create tenant
+        var tenant = new Data.Entities.Tenant
+        {
+            CompanyName = companyName
+        };
+        _db.Tenants.Add(tenant);
+
+        // Create default branding
+        var branding = new Data.Entities.TenantBranding { TenantId = tenant.Id };
+        _db.TenantBranding.Add(branding);
+
+        // Create admin role
+        var adminRole = new Data.Entities.Role
+        {
+            TenantId = tenant.Id,
+            Name = "Admin",
+            Description = "Full access to all features"
+        };
+        _db.Roles.Add(adminRole);
+
+        // Create member role
+        var memberRole = new Data.Entities.Role
+        {
+            TenantId = tenant.Id,
+            Name = "Member",
+            Description = "Standard team member access"
+        };
+        _db.Roles.Add(memberRole);
+
+        // Create user (no password — Entra ID auth)
+        var user = new Data.Entities.AppUser
+        {
+            TenantId = tenant.Id,
+            Email = entraUser.Email,
+            DisplayName = displayName,
+            EntraIdObjectId = entraUser.ObjectId,
+            LastLoginAt = DateTime.UtcNow
+        };
+        _db.AppUsers.Add(user);
+
+        // Assign admin role
+        _db.UserRoles.Add(new Data.Entities.UserRole
+        {
+            TenantId = tenant.Id,
+            UserId = user.Id,
+            RoleId = adminRole.Id
+        });
+
+        await _db.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("New Entra ID tenant provisioned: {CompanyName} by {Email}", companyName, entraUser.Email);
+
+        return GenerateAuthResponse(user.Id, tenant.Id, user.Email, user.DisplayName,
+            tenant.CompanyName, "Admin");
+    }
+
+    private async Task<EntraUserInfo> ValidateEntraTokenAsync(string accessToken, CancellationToken cancellationToken)
+    {
+        var instance = _config["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
+        var tenantId = _config["AzureAd:TenantId"] ?? throw new InvalidOperationException("AzureAd:TenantId not configured");
+        var clientId = _config["AzureAd:ClientId"] ?? throw new InvalidOperationException("AzureAd:ClientId not configured");
+        var audience = _config["AzureAd:Audience"] ?? $"api://{clientId}";
+
+        var authority = $"{instance.TrimEnd('/')}/{tenantId}/v2.0";
+        var metadataAddress = $"{authority}/.well-known/openid-configuration";
+
+        var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+            metadataAddress,
+            new OpenIdConnectConfigurationRetriever(),
+            new HttpDocumentRetriever());
+
+        var config = await configManager.GetConfigurationAsync(cancellationToken);
+
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = $"{instance.TrimEnd('/')}/{tenantId}/v2.0",
+            ValidateAudience = true,
+            ValidAudience = audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKeys = config.SigningKeys,
+            ValidateLifetime = true
+        };
+
+        var handler = new JwtSecurityTokenHandler();
+        var principal = handler.ValidateToken(accessToken, validationParameters, out var validatedToken);
+
+        var oid = principal.FindFirst("oid")?.Value
+            ?? principal.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value
+            ?? throw new SecurityTokenException("Missing oid claim");
+
+        var email = principal.FindFirst("preferred_username")?.Value
+            ?? principal.FindFirst(ClaimTypes.Email)?.Value
+            ?? principal.FindFirst("email")?.Value
+            ?? throw new SecurityTokenException("Missing email claim");
+
+        var name = principal.FindFirst("name")?.Value ?? email;
+
+        return new EntraUserInfo(oid, email, name);
+    }
+
+    private record EntraUserInfo(string ObjectId, string Email, string Name);
 }

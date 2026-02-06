@@ -53,3 +53,29 @@ public class RefreshRequest
     [Required]
     public string Token { get; set; } = string.Empty;
 }
+
+public class EntraLoginRequest
+{
+    [Required]
+    public string AccessToken { get; set; } = string.Empty;
+}
+
+public class EntraProvisionRequest
+{
+    [Required]
+    public string AccessToken { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(200)]
+    public string CompanyName { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(100)]
+    public string DisplayName { get; set; } = string.Empty;
+}
+
+public class EntraLoginResponse
+{
+    public bool IsProvisioned { get; set; }
+    public AuthResponse? Auth { get; set; }
+}

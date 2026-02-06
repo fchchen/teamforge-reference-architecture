@@ -1,0 +1,41 @@
+<div class="provision-container">
+  <mat-card class="provision-card">
+    <mat-card-header>
+      <mat-card-title>Create Your Workspace</mat-card-title>
+      <mat-card-subtitle>Complete your Microsoft sign-in setup</mat-card-subtitle>
+    </mat-card-header>
+
+    @if (authService.isLoading()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <mat-card-content>
+      @if (authService.error()) {
+        <div class="error-message">{{ authService.error() }}</div>
+      }
+
+      <form [formGroup]="provisionForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Company Name</mat-label>
+          <input matInput formControlName="companyName" placeholder="Your company name">
+          <mat-icon matSuffix>business</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Display Name</mat-label>
+          <input matInput formControlName="displayName" placeholder="Your name">
+          <mat-icon matSuffix>person</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" class="full-width"
+                [disabled]="provisionForm.invalid || authService.isLoading()">
+          Create Workspace
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <a mat-button routerLink="/login">Back to login</a>
+    </mat-card-actions>
+  </mat-card>
+</div>

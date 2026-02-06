@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { MsalService } from './msal.service';
 
 const STORAGE_KEY = 'tf_auth';
 
@@ -29,10 +30,16 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface EntraLoginResponse {
+  isProvisioned: boolean;
+  auth: AuthResponse | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
+  private msalService = inject(MsalService);
   private apiUrl = environment.apiUrl;
 
   authResponse = signal<AuthResponse | null>(null);
@@ -103,6 +110,65 @@ export class AuthService {
       }),
       catchError(err => {
         this.error.set(err.error?.title || 'Demo login failed');
+        this.isLoading.set(false);
+        return of(null);
+      })
+    ).subscribe();
+  }
+
+  pendingEntraToken = signal<string | null>(null);
+
+  async entraLogin(): Promise<void> {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    try {
+      const accessToken = await this.msalService.loginPopup();
+      this.http.post<EntraLoginResponse>(`${this.apiUrl}/auth/entra-login`, { accessToken }).pipe(
+        tap(response => {
+          if (response.isProvisioned && response.auth) {
+            this.setAuth(response.auth);
+            this.isLoading.set(false);
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.pendingEntraToken.set(accessToken);
+            this.isLoading.set(false);
+            this.router.navigate(['/entra-provision']);
+          }
+        }),
+        catchError(err => {
+          this.error.set(err.error?.title || 'Entra ID login failed');
+          this.isLoading.set(false);
+          return of(null);
+        })
+      ).subscribe();
+    } catch (err: any) {
+      this.error.set(err.message || 'Microsoft sign-in was cancelled');
+      this.isLoading.set(false);
+    }
+  }
+
+  entraProvision(companyName: string, displayName: string): void {
+    const accessToken = this.pendingEntraToken();
+    if (!accessToken) {
+      this.error.set('No pending Entra ID token. Please sign in with Microsoft again.');
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.http.post<AuthResponse>(`${this.apiUrl}/auth/entra-provision`, {
+      accessToken, companyName, displayName
+    }).pipe(
+      tap(response => {
+        this.pendingEntraToken.set(null);
+        this.setAuth(response);
+        this.isLoading.set(false);
+        this.router.navigate(['/dashboard']);
+      }),
+      catchError(err => {
+        this.error.set(err.error?.title || 'Provisioning failed');
         this.isLoading.set(false);
         return of(null);
       })

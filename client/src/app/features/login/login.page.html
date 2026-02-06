@@ -35,6 +35,15 @@
 
       <mat-divider class="divider"></mat-divider>
 
+      <button mat-stroked-button type="button" class="full-width microsoft-btn"
+              (click)="signInWithMicrosoft()"
+              [disabled]="authService.isLoading()">
+        <mat-icon>login</mat-icon>
+        Sign in with Microsoft
+      </button>
+
+      <mat-divider class="divider"></mat-divider>
+
       <div class="demo-section">
         <p class="demo-label">Try a demo workspace</p>
         <div class="demo-buttons">

@@ -18,6 +18,11 @@ export const routes: Routes = [
       import('./features/register/register.page').then(m => m.RegisterPage)
   },
   {
+    path: 'entra-provision',
+    loadComponent: () =>
+      import('./features/entra-provision/entra-provision.page').then(m => m.EntraProvisionPage)
+  },
+  {
     path: 'onboarding',
     loadComponent: () =>
       import('./features/onboarding/onboarding.page').then(m => m.OnboardingPage),

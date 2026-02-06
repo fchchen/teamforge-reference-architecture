@@ -4,6 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { LoginPage } from './login.page';
 import { AuthService } from '../../core/services/auth.service';
+import { MsalService } from '../../core/services/msal.service';
 
 describe('LoginPage', () => {
   let component: LoginPage;
@@ -13,8 +14,18 @@ describe('LoginPage', () => {
   beforeEach(async () => {
     localStorage.clear();
 
+    const mockMsalService = {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      loginPopup: vi.fn().mockResolvedValue('mock-token'),
+      acquireTokenSilent: vi.fn().mockResolvedValue('mock-token'),
+      logout: vi.fn().mockResolvedValue(undefined)
+    };
+
     await TestBed.configureTestingModule({
-      imports: [LoginPage, HttpClientTestingModule, RouterTestingModule, NoopAnimationsModule]
+      imports: [LoginPage, HttpClientTestingModule, RouterTestingModule, NoopAnimationsModule],
+      providers: [
+        { provide: MsalService, useValue: mockMsalService }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginPage);
@@ -80,5 +91,18 @@ describe('LoginPage', () => {
     const link = fixture.nativeElement.querySelector('a[routerLink="/register"]');
     expect(link).toBeTruthy();
     expect(link.textContent).toContain('Create a new workspace');
+  });
+
+  it('should render Sign in with Microsoft button', () => {
+    const btn = fixture.nativeElement.querySelector('.microsoft-btn');
+    expect(btn).toBeTruthy();
+    expect(btn.textContent).toContain('Sign in with Microsoft');
+  });
+
+  it('should call signInWithMicrosoft on Microsoft button click', () => {
+    vi.spyOn(component, 'signInWithMicrosoft');
+    const btn = fixture.nativeElement.querySelector('.microsoft-btn');
+    btn.click();
+    expect(component.signInWithMicrosoft).toHaveBeenCalled();
   });
 });

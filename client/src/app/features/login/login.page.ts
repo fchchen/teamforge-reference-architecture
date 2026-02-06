@@ -41,4 +41,8 @@ export class LoginPage {
   demoLogin(tenantName: string): void {
     this.authService.demoLogin(tenantName);
   }
+
+  signInWithMicrosoft(): void {
+    this.authService.entraLogin();
+  }
 }

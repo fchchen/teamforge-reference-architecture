@@ -51,6 +51,11 @@ public class TeamForgeDbContext : DbContext
             entity.HasIndex(e => new { e.TenantId, e.Email })
                 .IsUnique()
                 .HasDatabaseName("IX_AppUsers_TenantId_Email");
+
+            entity.HasIndex(e => e.EntraIdObjectId)
+                .IsUnique()
+                .HasFilter("[EntraIdObjectId] IS NOT NULL")
+                .HasDatabaseName("IX_AppUsers_EntraIdObjectId");
         });
 
         // Role

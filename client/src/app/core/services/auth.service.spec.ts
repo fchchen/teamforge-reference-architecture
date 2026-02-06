@@ -2,12 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { AuthService, AuthResponse } from './auth.service';
+import { MsalService } from './msal.service';
 import { environment } from '../../../environments/environment';
 
 describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
   let router: { navigate: ReturnType<typeof vi.fn>; createUrlTree: ReturnType<typeof vi.fn> };
+  let mockMsalService: { loginPopup: ReturnType<typeof vi.fn>; initialize: ReturnType<typeof vi.fn>; acquireTokenSilent: ReturnType<typeof vi.fn>; logout: ReturnType<typeof vi.fn> };
 
   const mockAuthResponse: AuthResponse = {
     token: 'test-token-123',
@@ -22,11 +24,18 @@ describe('AuthService', () => {
   beforeEach(() => {
     localStorage.clear();
     router = { navigate: vi.fn(), createUrlTree: vi.fn() };
+    mockMsalService = {
+      initialize: vi.fn().mockResolvedValue(undefined),
+      loginPopup: vi.fn().mockResolvedValue('mock-entra-token'),
+      acquireTokenSilent: vi.fn().mockResolvedValue('mock-entra-token'),
+      logout: vi.fn().mockResolvedValue(undefined)
+    };
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
-        { provide: Router, useValue: router }
+        { provide: Router, useValue: router },
+        { provide: MsalService, useValue: mockMsalService }
       ]
     });
 
@@ -156,7 +165,10 @@ describe('AuthService', () => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         imports: [HttpClientTestingModule],
-        providers: [{ provide: Router, useValue: router }]
+        providers: [
+          { provide: Router, useValue: router },
+          { provide: MsalService, useValue: mockMsalService }
+        ]
       });
 
       const freshService = TestBed.inject(AuthService);
@@ -171,7 +183,10 @@ describe('AuthService', () => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         imports: [HttpClientTestingModule],
-        providers: [{ provide: Router, useValue: router }]
+        providers: [
+          { provide: Router, useValue: router },
+          { provide: MsalService, useValue: mockMsalService }
+        ]
       });
 
       const freshService = TestBed.inject(AuthService);
@@ -185,7 +200,10 @@ describe('AuthService', () => {
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
         imports: [HttpClientTestingModule],
-        providers: [{ provide: Router, useValue: router }]
+        providers: [
+          { provide: Router, useValue: router },
+          { provide: MsalService, useValue: mockMsalService }
+        ]
       });
 
       const freshService = TestBed.inject(AuthService);
@@ -208,6 +226,81 @@ describe('AuthService', () => {
       httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(expired);
 
       expect(service.isAuthenticated()).toBe(false);
+    });
+  });
+
+  describe('entraLogin', () => {
+    it('should call MSAL loginPopup and post to entra-login endpoint', async () => {
+      const entraLoginPromise = service.entraLogin();
+
+      // Wait for MSAL popup to resolve
+      await vi.waitFor(() => {
+        expect(mockMsalService.loginPopup).toHaveBeenCalled();
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/entra-login`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ accessToken: 'mock-entra-token' });
+
+      req.flush({ isProvisioned: true, auth: mockAuthResponse });
+      await entraLoginPromise;
+
+      expect(service.isAuthenticated()).toBe(true);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    });
+
+    it('should navigate to entra-provision when not provisioned', async () => {
+      const entraLoginPromise = service.entraLogin();
+
+      await vi.waitFor(() => {
+        expect(mockMsalService.loginPopup).toHaveBeenCalled();
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/entra-login`);
+      req.flush({ isProvisioned: false, auth: null });
+      await entraLoginPromise;
+
+      expect(service.isAuthenticated()).toBe(false);
+      expect(service.pendingEntraToken()).toBe('mock-entra-token');
+      expect(router.navigate).toHaveBeenCalledWith(['/entra-provision']);
+    });
+
+    it('should set error when MSAL popup fails', async () => {
+      mockMsalService.loginPopup.mockRejectedValueOnce(new Error('User cancelled'));
+
+      await service.entraLogin();
+
+      expect(service.error()).toBe('User cancelled');
+      expect(service.isLoading()).toBe(false);
+    });
+  });
+
+  describe('entraProvision', () => {
+    it('should post provision request and set auth on success', async () => {
+      service.pendingEntraToken.set('mock-entra-token');
+
+      service.entraProvision('New Corp', 'New User');
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/auth/entra-provision`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        accessToken: 'mock-entra-token',
+        companyName: 'New Corp',
+        displayName: 'New User'
+      });
+
+      req.flush(mockAuthResponse);
+
+      expect(service.isAuthenticated()).toBe(true);
+      expect(service.pendingEntraToken()).toBeNull();
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    });
+
+    it('should set error when no pending token', () => {
+      service.pendingEntraToken.set(null);
+      service.entraProvision('Corp', 'User');
+
+      expect(service.error()).toBe('No pending Entra ID token. Please sign in with Microsoft again.');
     });
   });
 });

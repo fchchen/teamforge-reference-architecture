@@ -19,8 +19,10 @@ public class AppUser
     [StringLength(100)]
     public string DisplayName { get; set; } = string.Empty;
 
-    [Required]
-    public string PasswordHash { get; set; } = string.Empty;
+    public string? PasswordHash { get; set; }
+
+    [StringLength(36)]
+    public string? EntraIdObjectId { get; set; }
 
     public bool IsActive { get; set; } = true;
 

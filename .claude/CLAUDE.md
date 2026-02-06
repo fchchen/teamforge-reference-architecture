@@ -7,7 +7,7 @@ Multi-tenant SaaS project management platform with row-level security (RLS).
 ### Backend (`src/`)
 - **.NET 8** Web API (`TeamForge.Api`)
 - **Entity Framework Core** with SQL Server (`TeamForge.Data`)
-- **JWT authentication** with tenant-scoped tokens
+- **JWT authentication** with tenant-scoped tokens + **MS Entra ID SSO** (token exchange)
 - **xUnit** tests (`TeamForge.Tests`) — run with `cd src && dotnet test`
 
 ### Frontend (`client/`)
@@ -41,3 +41,16 @@ cd src && dotnet test                          # Backend tests
 - Use `vi.spyOn()` for spies, `vi.fn()` for mock functions
 - Feature pages use `.page.ts` suffix (e.g., `login.page.ts`)
 - Environment configs in `client/src/environments/`
+
+## MS Entra ID SSO Setup
+
+To enable Microsoft Entra ID (Azure AD) sign-in:
+
+1. **Azure Portal** → Entra ID → App registrations → New registration
+2. Set **Redirect URI**: `http://localhost:4200` (SPA type)
+3. **Expose an API** → Add scope `access_as_user`
+4. **API permissions** → Grant `User.Read` (delegated)
+5. Copy **Client ID** and **Tenant ID** into:
+   - `src/TeamForge.Api/appsettings.json` → `AzureAd` section
+   - `client/src/environments/environment.ts` → `azure` section
+6. The hybrid auth flow: MSAL popup → Entra token → `POST /auth/entra-login` → TeamForge JWT
