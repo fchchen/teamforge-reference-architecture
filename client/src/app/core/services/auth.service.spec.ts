@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 describe('AuthService', () => {
   let service: AuthService;
   let httpMock: HttpTestingController;
-  let router: jasmine.SpyObj<Router>;
+  let router: { navigate: ReturnType<typeof vi.fn>; createUrlTree: ReturnType<typeof vi.fn> };
 
   const mockAuthResponse: AuthResponse = {
     token: 'test-token-123',
@@ -21,7 +21,7 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    router = jasmine.createSpyObj('Router', ['navigate', 'createUrlTree']);
+    router = { navigate: vi.fn(), createUrlTree: vi.fn() };
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
@@ -44,7 +44,7 @@ describe('AuthService', () => {
   });
 
   it('should start unauthenticated', () => {
-    expect(service.isAuthenticated()).toBeFalse();
+    expect(service.isAuthenticated()).toBe(false);
     expect(service.currentUser()).toBeNull();
     expect(service.token()).toBeNull();
     expect(service.tenantId()).toBeNull();
@@ -58,7 +58,7 @@ describe('AuthService', () => {
       expect(req.request.method).toBe('POST');
       req.flush(mockAuthResponse);
 
-      expect(service.isAuthenticated()).toBeTrue();
+      expect(service.isAuthenticated()).toBe(true);
       expect(service.currentUser()).toBe('Admin User');
       expect(service.token()).toBe('test-token-123');
       expect(service.tenantName()).toBe('Acme Corp');
@@ -71,18 +71,18 @@ describe('AuthService', () => {
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
       req.flush({ title: 'Invalid credentials' }, { status: 401, statusText: 'Unauthorized' });
 
-      expect(service.isAuthenticated()).toBeFalse();
+      expect(service.isAuthenticated()).toBe(false);
       expect(service.error()).toBe('Invalid credentials');
-      expect(service.isLoading()).toBeFalse();
+      expect(service.isLoading()).toBe(false);
     });
 
     it('should set isLoading during login', () => {
       service.login({ email: 'a@b.com', password: 'p' });
-      expect(service.isLoading()).toBeTrue();
+      expect(service.isLoading()).toBe(true);
 
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
       req.flush(mockAuthResponse);
-      expect(service.isLoading()).toBeFalse();
+      expect(service.isLoading()).toBe(false);
     });
   });
 
@@ -99,7 +99,7 @@ describe('AuthService', () => {
       expect(req.request.method).toBe('POST');
       req.flush(mockAuthResponse);
 
-      expect(service.isAuthenticated()).toBeTrue();
+      expect(service.isAuthenticated()).toBe(true);
       expect(router.navigate).toHaveBeenCalledWith(['/onboarding']);
     });
 
@@ -126,7 +126,7 @@ describe('AuthService', () => {
       expect(req.request.body).toEqual({ tenantName: 'Acme Corp' });
       req.flush(mockAuthResponse);
 
-      expect(service.isAuthenticated()).toBeTrue();
+      expect(service.isAuthenticated()).toBe(true);
       expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
     });
   });
@@ -136,12 +136,12 @@ describe('AuthService', () => {
       // First login
       service.login({ email: 'a@b.com', password: 'p' });
       httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(mockAuthResponse);
-      expect(service.isAuthenticated()).toBeTrue();
+      expect(service.isAuthenticated()).toBe(true);
 
       // Then logout
       service.logout();
 
-      expect(service.isAuthenticated()).toBeFalse();
+      expect(service.isAuthenticated()).toBe(false);
       expect(service.currentUser()).toBeNull();
       expect(service.token()).toBeNull();
       expect(localStorage.getItem('tf_auth')).toBeNull();
@@ -160,7 +160,7 @@ describe('AuthService', () => {
       });
 
       const freshService = TestBed.inject(AuthService);
-      expect(freshService.isAuthenticated()).toBeTrue();
+      expect(freshService.isAuthenticated()).toBe(true);
       expect(freshService.currentUser()).toBe('Admin User');
     });
 
@@ -175,7 +175,7 @@ describe('AuthService', () => {
       });
 
       const freshService = TestBed.inject(AuthService);
-      expect(freshService.isAuthenticated()).toBeFalse();
+      expect(freshService.isAuthenticated()).toBe(false);
       expect(localStorage.getItem('tf_auth')).toBeNull();
     });
 
@@ -189,7 +189,7 @@ describe('AuthService', () => {
       });
 
       const freshService = TestBed.inject(AuthService);
-      expect(freshService.isAuthenticated()).toBeFalse();
+      expect(freshService.isAuthenticated()).toBe(false);
       expect(localStorage.getItem('tf_auth')).toBeNull();
     });
   });
@@ -207,7 +207,7 @@ describe('AuthService', () => {
       service.login({ email: 'a@b.com', password: 'p' });
       httpMock.expectOne(`${environment.apiUrl}/auth/login`).flush(expired);
 
-      expect(service.isAuthenticated()).toBeFalse();
+      expect(service.isAuthenticated()).toBe(false);
     });
   });
 });

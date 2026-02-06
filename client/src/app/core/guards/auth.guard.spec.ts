@@ -41,7 +41,7 @@ describe('authGuard', () => {
     });
 
     const result = TestBed.runInInjectionContext(() => authGuard(mockRoute, mockState));
-    expect(result).toBeTrue();
+    expect(result).toBe(true);
   });
 
   it('should include returnUrl query param on redirect', () => {
@@ -96,7 +96,7 @@ describe('adminGuard', () => {
     });
 
     const result = TestBed.runInInjectionContext(() => adminGuard(mockRoute, mockState));
-    expect(result).toBeTrue();
+    expect(result).toBe(true);
   });
 
   it('should redirect when unauthenticated', () => {

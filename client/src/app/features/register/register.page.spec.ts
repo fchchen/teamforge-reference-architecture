@@ -32,14 +32,14 @@ describe('RegisterPage', () => {
   });
 
   it('should have all required form fields', () => {
-    expect(component.registerForm.contains('companyName')).toBeTrue();
-    expect(component.registerForm.contains('displayName')).toBeTrue();
-    expect(component.registerForm.contains('email')).toBeTrue();
-    expect(component.registerForm.contains('password')).toBeTrue();
+    expect(component.registerForm.contains('companyName')).toBe(true);
+    expect(component.registerForm.contains('displayName')).toBe(true);
+    expect(component.registerForm.contains('email')).toBe(true);
+    expect(component.registerForm.contains('password')).toBe(true);
   });
 
   it('should start with invalid form', () => {
-    expect(component.registerForm.valid).toBeFalse();
+    expect(component.registerForm.valid).toBe(false);
   });
 
   it('should be valid with proper values', () => {
@@ -49,17 +49,17 @@ describe('RegisterPage', () => {
       email: 'jane@newco.com',
       password: 'password123'
     });
-    expect(component.registerForm.valid).toBeTrue();
+    expect(component.registerForm.valid).toBe(true);
   });
 
   it('should require minimum 2 characters for company name', () => {
     component.registerForm.patchValue({ companyName: 'A' });
-    expect(component.registerForm.get('companyName')?.hasError('minlength')).toBeTrue();
+    expect(component.registerForm.get('companyName')?.hasError('minlength')).toBe(true);
   });
 
   it('should require minimum 8 characters for password', () => {
     component.registerForm.patchValue({ password: 'short' });
-    expect(component.registerForm.get('password')?.hasError('minlength')).toBeTrue();
+    expect(component.registerForm.get('password')?.hasError('minlength')).toBe(true);
   });
 
   it('should have link to login page', () => {

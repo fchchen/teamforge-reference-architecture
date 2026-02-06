@@ -35,22 +35,22 @@ describe('LoginPage', () => {
   });
 
   it('should have email and password fields', () => {
-    expect(component.loginForm.contains('email')).toBeTrue();
-    expect(component.loginForm.contains('password')).toBeTrue();
+    expect(component.loginForm.contains('email')).toBe(true);
+    expect(component.loginForm.contains('password')).toBe(true);
   });
 
   it('should start with invalid form', () => {
-    expect(component.loginForm.valid).toBeFalse();
+    expect(component.loginForm.valid).toBe(false);
   });
 
   it('should be valid with proper email and password', () => {
     component.loginForm.setValue({ email: 'test@example.com', password: 'password123' });
-    expect(component.loginForm.valid).toBeTrue();
+    expect(component.loginForm.valid).toBe(true);
   });
 
   it('should reject invalid email format', () => {
     component.loginForm.setValue({ email: 'not-an-email', password: 'password123' });
-    expect(component.loginForm.get('email')?.hasError('email')).toBeTrue();
+    expect(component.loginForm.get('email')?.hasError('email')).toBe(true);
   });
 
   it('should render three demo buttons', () => {
@@ -62,7 +62,7 @@ describe('LoginPage', () => {
   });
 
   it('should call demoLogin with tenant name on demo button click', () => {
-    spyOn(component, 'demoLogin');
+    vi.spyOn(component, 'demoLogin');
     const buttons = fixture.nativeElement.querySelectorAll('.demo-btn');
     buttons[0].click();
     expect(component.demoLogin).toHaveBeenCalledWith('Acme Corp');

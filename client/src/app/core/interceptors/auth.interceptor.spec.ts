@@ -17,7 +17,7 @@ describe('authInterceptor', () => {
       providers: [
         provideHttpClient(withInterceptors([authInterceptor])),
         provideHttpClientTesting(),
-        { provide: Router, useValue: jasmine.createSpyObj('Router', ['navigate', 'createUrlTree']) }
+        { provide: Router, useValue: { navigate: vi.fn(), createUrlTree: vi.fn() } }
       ]
     });
 
@@ -53,7 +53,7 @@ describe('authInterceptor', () => {
     http.get('/api/test').subscribe();
 
     const req = httpMock.expectOne('/api/test');
-    expect(req.request.headers.has('Authorization')).toBeFalse();
+    expect(req.request.headers.has('Authorization')).toBe(false);
     req.flush({});
   });
 });

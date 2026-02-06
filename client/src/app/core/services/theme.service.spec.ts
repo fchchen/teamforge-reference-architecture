@@ -45,7 +45,7 @@ describe('ThemeService', () => {
 
   describe('loadBranding', () => {
     it('should fetch branding and apply theme', () => {
-      spyOn(service, 'applyTheme');
+      vi.spyOn(service, 'applyTheme');
       service.loadBranding();
 
       const req = httpMock.expectOne(`${environment.apiUrl}/branding`);
@@ -55,16 +55,16 @@ describe('ThemeService', () => {
       expect(service.branding()).toEqual(mockBranding);
       expect(service.companyName()).toBe('Acme Corp');
       expect(service.tagLine()).toBe('Building the future');
-      expect(service.isLoading()).toBeFalse();
+      expect(service.isLoading()).toBe(false);
       expect(service.applyTheme).toHaveBeenCalledWith(mockBranding);
     });
 
     it('should set isLoading during fetch', () => {
       service.loadBranding();
-      expect(service.isLoading()).toBeTrue();
+      expect(service.isLoading()).toBe(true);
 
       httpMock.expectOne(`${environment.apiUrl}/branding`).flush(mockBranding);
-      expect(service.isLoading()).toBeFalse();
+      expect(service.isLoading()).toBe(false);
     });
 
     it('should handle fetch error gracefully', () => {
@@ -73,14 +73,14 @@ describe('ThemeService', () => {
       httpMock.expectOne(`${environment.apiUrl}/branding`)
         .flush(null, { status: 500, statusText: 'Server Error' });
 
-      expect(service.isLoading()).toBeFalse();
+      expect(service.isLoading()).toBe(false);
       expect(service.branding()).toBeNull();
     });
   });
 
   describe('updateBranding', () => {
     it('should PUT updates and apply new theme', () => {
-      spyOn(service, 'applyTheme');
+      vi.spyOn(service, 'applyTheme');
       const updated = { ...mockBranding, primaryColor: '#ff0000' };
 
       service.updateBranding({ primaryColor: '#ff0000' });
@@ -111,17 +111,17 @@ describe('ThemeService', () => {
   describe('previewTheme', () => {
     it('should merge partial branding with current and apply', () => {
       service.branding.set(mockBranding);
-      spyOn(service, 'applyTheme');
+      vi.spyOn(service, 'applyTheme');
 
       service.previewTheme({ primaryColor: '#ff0000' });
 
       expect(service.applyTheme).toHaveBeenCalledWith(
-        jasmine.objectContaining({ primaryColor: '#ff0000', secondaryColor: '#ff9800' })
+        expect.objectContaining({ primaryColor: '#ff0000', secondaryColor: '#ff9800' })
       );
     });
 
     it('should do nothing if no current branding', () => {
-      spyOn(service, 'applyTheme');
+      vi.spyOn(service, 'applyTheme');
       service.previewTheme({ primaryColor: '#ff0000' });
       expect(service.applyTheme).not.toHaveBeenCalled();
     });
@@ -130,7 +130,7 @@ describe('ThemeService', () => {
   describe('resetTheme', () => {
     it('should re-apply current branding', () => {
       service.branding.set(mockBranding);
-      spyOn(service, 'applyTheme');
+      vi.spyOn(service, 'applyTheme');
 
       service.resetTheme();
 

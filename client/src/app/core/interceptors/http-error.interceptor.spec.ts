@@ -8,10 +8,10 @@ import { LoadingService } from '../services/loading.service';
 describe('httpErrorInterceptor', () => {
   let httpMock: HttpTestingController;
   let http: HttpClient;
-  let router: jasmine.SpyObj<Router>;
+  let router: { navigate: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    router = jasmine.createSpyObj('Router', ['navigate']);
+    router = { navigate: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
@@ -81,7 +81,7 @@ describe('loadingInterceptor', () => {
 
   it('should show loading on request start', () => {
     http.get('/api/test').subscribe();
-    expect(loadingService.isLoading()).toBeTrue();
+    expect(loadingService.isLoading()).toBe(true);
 
     httpMock.expectOne('/api/test').flush({});
   });
@@ -92,6 +92,6 @@ describe('loadingInterceptor', () => {
     httpMock.expectOne('/api/test')
       .flush(null, { status: 500, statusText: 'Error' });
 
-    expect(loadingService.isLoading()).toBeFalse();
+    expect(loadingService.isLoading()).toBe(false);
   });
 });

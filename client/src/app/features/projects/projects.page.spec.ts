@@ -37,25 +37,25 @@ describe('ProjectsPage', () => {
     httpMock.expectOne(`${environment.apiUrl}/projects`).flush(mockProjects);
 
     expect(component.projects().length).toBe(2);
-    expect(component.isLoading()).toBeFalse();
+    expect(component.isLoading()).toBe(false);
   });
 
   it('should toggle create form visibility', () => {
     fixture.detectChanges();
     httpMock.expectOne(`${environment.apiUrl}/projects`).flush([]);
 
-    expect(component.showCreateForm()).toBeFalse();
+    expect(component.showCreateForm()).toBe(false);
     component.showCreateForm.set(true);
-    expect(component.showCreateForm()).toBeTrue();
+    expect(component.showCreateForm()).toBe(true);
   });
 
   it('should have required name field in create form', () => {
     fixture.detectChanges();
     httpMock.expectOne(`${environment.apiUrl}/projects`).flush([]);
 
-    expect(component.createForm.get('name')?.hasError('required')).toBeTrue();
+    expect(component.createForm.get('name')?.hasError('required')).toBe(true);
     component.createForm.patchValue({ name: 'New Project' });
-    expect(component.createForm.valid).toBeTrue();
+    expect(component.createForm.valid).toBe(true);
   });
 
   it('should create project and add to list', () => {
@@ -71,7 +71,7 @@ describe('ProjectsPage', () => {
     req.flush(newProject);
 
     expect(component.projects().length).toBe(1);
-    expect(component.showCreateForm()).toBeFalse();
+    expect(component.showCreateForm()).toBe(false);
   });
 
   it('should delete project from list', () => {

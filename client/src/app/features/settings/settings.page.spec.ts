@@ -54,7 +54,7 @@ describe('SettingsPage', () => {
   });
 
   it('should update color signal on change', () => {
-    spyOn(themeService, 'previewTheme');
+    vi.spyOn(themeService, 'previewTheme');
     fixture.detectChanges();
 
     component.onColorChange('primaryColor', '#ff0000');
@@ -63,13 +63,13 @@ describe('SettingsPage', () => {
   });
 
   it('should update font and trigger preview', () => {
-    spyOn(themeService, 'previewTheme');
+    vi.spyOn(themeService, 'previewTheme');
     fixture.detectChanges();
 
     component.onFontChange('Inter');
     expect(component.fontFamily()).toBe('Inter');
     expect(themeService.previewTheme).toHaveBeenCalledWith(
-      jasmine.objectContaining({ fontFamily: 'Inter' })
+      expect.objectContaining({ fontFamily: 'Inter' })
     );
   });
 
@@ -80,7 +80,7 @@ describe('SettingsPage', () => {
     component.onColorChange('primaryColor', '#ff0000');
     expect(component.primaryColor()).toBe('#ff0000');
 
-    spyOn(themeService, 'resetTheme');
+    vi.spyOn(themeService, 'resetTheme');
     component.resetPreview();
 
     expect(component.primaryColor()).toBe('#1976d2');
@@ -88,7 +88,7 @@ describe('SettingsPage', () => {
   });
 
   it('should call updateBranding with current values on save', () => {
-    spyOn(themeService, 'updateBranding');
+    vi.spyOn(themeService, 'updateBranding');
     fixture.detectChanges();
 
     component.primaryColor.set('#ff0000');
@@ -96,7 +96,7 @@ describe('SettingsPage', () => {
     component.saveBranding();
 
     expect(themeService.updateBranding).toHaveBeenCalledWith(
-      jasmine.objectContaining({
+      expect.objectContaining({
         primaryColor: '#ff0000',
         tagLine: 'New tagline'
       })

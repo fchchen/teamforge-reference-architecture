@@ -37,7 +37,7 @@ describe('TeamsPage', () => {
     httpMock.expectOne(`${environment.apiUrl}/teams`).flush(mockTeams);
 
     expect(component.teams().length).toBe(2);
-    expect(component.isLoading()).toBeFalse();
+    expect(component.isLoading()).toBe(false);
   });
 
   it('should create team and add to list', () => {
@@ -53,7 +53,7 @@ describe('TeamsPage', () => {
     req.flush(newTeam);
 
     expect(component.teams().length).toBe(1);
-    expect(component.showCreateForm()).toBeFalse();
+    expect(component.showCreateForm()).toBe(false);
   });
 
   it('should not submit invalid form', () => {

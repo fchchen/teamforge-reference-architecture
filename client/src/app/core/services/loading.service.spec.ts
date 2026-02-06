@@ -14,17 +14,17 @@ describe('LoadingService', () => {
   });
 
   it('should start with isLoading false', () => {
-    expect(service.isLoading()).toBeFalse();
+    expect(service.isLoading()).toBe(false);
   });
 
   it('should set isLoading to true on show()', () => {
     service.show();
-    expect(service.isLoading()).toBeTrue();
+    expect(service.isLoading()).toBe(true);
   });
 
   it('should set isLoading to false on hide()', () => {
     service.show();
     service.hide();
-    expect(service.isLoading()).toBeFalse();
+    expect(service.isLoading()).toBe(false);
   });
 });

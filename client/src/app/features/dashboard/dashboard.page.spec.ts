@@ -47,7 +47,7 @@ describe('DashboardPage', () => {
 
   it('should show loading spinner initially', () => {
     fixture.detectChanges();
-    expect(component.isLoading()).toBeTrue();
+    expect(component.isLoading()).toBe(true);
 
     const spinner = fixture.nativeElement.querySelector('mat-spinner');
     expect(spinner).toBeTruthy();
@@ -60,7 +60,7 @@ describe('DashboardPage', () => {
     httpMock.expectOne(`${environment.apiUrl}/dashboard`).flush(mockDashboard);
     fixture.detectChanges();
 
-    expect(component.isLoading()).toBeFalse();
+    expect(component.isLoading()).toBe(false);
     expect(component.data()?.projectCount).toBe(5);
     expect(component.data()?.teamCount).toBe(3);
     expect(component.data()?.userCount).toBe(12);
@@ -72,7 +72,7 @@ describe('DashboardPage', () => {
       .flush(null, { status: 500, statusText: 'Error' });
     fixture.detectChanges();
 
-    expect(component.isLoading()).toBeFalse();
+    expect(component.isLoading()).toBe(false);
     expect(component.data()).toBeNull();
   });
 });
