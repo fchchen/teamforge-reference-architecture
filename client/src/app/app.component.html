@@ -1,0 +1,7 @@
+@if (authService.isAuthenticated()) {
+  <app-themed-toolbar />
+}
+@if (loadingService.isLoading()) {
+  <mat-progress-bar mode="indeterminate" class="global-loading"></mat-progress-bar>
+}
+<router-outlet />

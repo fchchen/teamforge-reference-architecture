@@ -1,0 +1,67 @@
+/* TeamForge Global Styles — CSS Custom Properties for Dynamic Whitelabeling */
+
+:root {
+  --tf-primary: #1976d2;
+  --tf-secondary: #ff9800;
+  --tf-accent: #4caf50;
+  --tf-background: #fafafa;
+  --tf-text: #212121;
+  --tf-font-family: 'Roboto', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: var(--tf-font-family);
+  background-color: var(--tf-background);
+  color: var(--tf-text);
+}
+
+/* Angular Material Theme Overrides via CSS Custom Properties */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-flat-button.mat-primary,
+.mat-mdc-fab.mat-primary {
+  --mdc-filled-button-container-color: var(--tf-primary);
+}
+
+.mat-toolbar.mat-primary {
+  background-color: var(--tf-primary) !important;
+}
+
+.mat-mdc-progress-spinner circle,
+.mat-mdc-progress-bar .mdc-linear-progress__bar-inner {
+  stroke: var(--tf-primary);
+}
+
+a {
+  color: var(--tf-primary);
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 24px;
+}
+
+.stat-card .stat-value {
+  font-size: 2.5rem;
+  font-weight: 500;
+  color: var(--tf-primary);
+}
+
+.stat-card .stat-label {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 4px;
+}

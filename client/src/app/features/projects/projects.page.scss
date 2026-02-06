@@ -1,0 +1,26 @@
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.create-form-card {
+  margin-bottom: 24px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 60px;
+}

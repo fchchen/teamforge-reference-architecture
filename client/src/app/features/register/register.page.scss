@@ -1,0 +1,25 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--tf-background);
+}
+
+.register-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}

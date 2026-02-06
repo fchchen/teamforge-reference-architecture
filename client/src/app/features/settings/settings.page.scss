@@ -1,0 +1,43 @@
+.branding-card {
+  max-width: 600px;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.color-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.color-field label {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.color-field input[type="color"] {
+  width: 60px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.color-value {
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.divider {
+  margin: 24px 0;
+}

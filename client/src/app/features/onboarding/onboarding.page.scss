@@ -1,0 +1,49 @@
+.onboarding-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.generating-bar {
+  margin-top: 16px;
+}
+
+.preview-section {
+  margin: 16px 0;
+}
+
+.color-preview {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.color-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.done-section {
+  text-align: center;
+  padding: 40px;
+}
+
+.done-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: var(--tf-accent);
+}

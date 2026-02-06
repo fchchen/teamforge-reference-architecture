@@ -1,0 +1,108 @@
+<div class="onboarding-container">
+  <mat-stepper linear #stepper>
+    <!-- Step 1: Describe Your Company -->
+    <mat-step [stepControl]="descriptionForm">
+      <ng-template matStepLabel>Describe Your Company</ng-template>
+      <form [formGroup]="descriptionForm">
+        <h2>Tell us about your company</h2>
+        <p>Our AI assistant will generate a customized workspace configuration.</p>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Company Description</mat-label>
+          <textarea matInput formControlName="description" rows="5"
+                    placeholder="We're a 30-person design agency with UX, Visual Design, and Frontend teams...">
+          </textarea>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="generate()"
+                [disabled]="descriptionForm.invalid || isGenerating()">
+          @if (isGenerating()) {
+            Generating...
+          } @else {
+            Generate Configuration
+          }
+        </button>
+      </form>
+
+      @if (isGenerating()) {
+        <mat-progress-bar mode="indeterminate" class="generating-bar"></mat-progress-bar>
+      }
+    </mat-step>
+
+    <!-- Step 2: Review & Edit -->
+    <mat-step>
+      <ng-template matStepLabel>Review Configuration</ng-template>
+      @if (preview()) {
+        <h2>Your Workspace Configuration</h2>
+
+        <mat-card class="preview-section">
+          <mat-card-header>
+            <mat-card-title>Branding</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="color-preview">
+              <span class="color-swatch" [style.background]="preview()!.branding.primaryColor"></span>
+              <span class="color-swatch" [style.background]="preview()!.branding.secondaryColor"></span>
+              <span class="color-swatch" [style.background]="preview()!.branding.accentColor"></span>
+            </div>
+            <p>{{ preview()!.branding.tagLine }}</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="preview-section">
+          <mat-card-header>
+            <mat-card-title>Teams</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              @for (team of preview()!.teams; track team.name) {
+                <mat-list-item>
+                  <mat-icon matListItemIcon>group</mat-icon>
+                  <span matListItemTitle>{{ team.name }}</span>
+                  <span matListItemLine>{{ team.description }}</span>
+                </mat-list-item>
+              }
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="preview-section">
+          <mat-card-header>
+            <mat-card-title>Roles</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-chip-set>
+              @for (role of preview()!.roles; track role) {
+                <mat-chip>{{ role }}</mat-chip>
+              }
+            </mat-chip-set>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="actions">
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-raised-button color="primary" (click)="confirm()"
+                  [disabled]="isConfirming()">
+            @if (isConfirming()) {
+              Setting up...
+            } @else {
+              Confirm & Launch
+            }
+          </button>
+        </div>
+      }
+    </mat-step>
+
+    <!-- Step 3: Done -->
+    <mat-step>
+      <ng-template matStepLabel>Ready!</ng-template>
+      <div class="done-section">
+        <mat-icon class="done-icon">check_circle</mat-icon>
+        <h2>Your workspace is ready!</h2>
+        <button mat-raised-button color="primary" (click)="goToDashboard()">
+          Go to Dashboard
+        </button>
+      </div>
+    </mat-step>
+  </mat-stepper>
+</div>

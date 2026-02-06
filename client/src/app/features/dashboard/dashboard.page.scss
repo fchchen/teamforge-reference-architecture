@@ -1,0 +1,26 @@
+.tagline {
+  color: rgba(0, 0, 0, 0.6);
+  font-style: italic;
+  margin-top: -8px;
+  margin-bottom: 24px;
+}
+
+.stats-grid {
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 32px;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 60px;
+}
+
+.announcement-card {
+  margin-bottom: 12px;
+}
+
+h2 {
+  margin-top: 32px;
+  margin-bottom: 16px;
+}

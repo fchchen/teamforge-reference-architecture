@@ -1,0 +1,58 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>TeamForge</mat-card-title>
+      <mat-card-subtitle>Sign in to your workspace</mat-card-subtitle>
+    </mat-card-header>
+
+    @if (authService.isLoading()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <mat-card-content>
+      @if (authService.error()) {
+        <div class="error-message">{{ authService.error() }}</div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="you@company.com">
+          <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password">
+          <mat-icon matSuffix>lock</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" class="full-width"
+                [disabled]="loginForm.invalid || authService.isLoading()">
+          Sign In
+        </button>
+      </form>
+
+      <mat-divider class="divider"></mat-divider>
+
+      <div class="demo-section">
+        <p class="demo-label">Try a demo workspace</p>
+        <div class="demo-buttons">
+          <button mat-stroked-button (click)="demoLogin('Acme Corp')" class="demo-btn">
+            Acme Corp
+          </button>
+          <button mat-stroked-button (click)="demoLogin('Pixel Studio')" class="demo-btn">
+            Pixel Studio
+          </button>
+          <button mat-stroked-button (click)="demoLogin('GreenLeaf Solutions')" class="demo-btn">
+            GreenLeaf
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <a mat-button routerLink="/register">Create a new workspace</a>
+    </mat-card-actions>
+  </mat-card>
+</div>

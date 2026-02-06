@@ -1,0 +1,53 @@
+<div class="register-container">
+  <mat-card class="register-card">
+    <mat-card-header>
+      <mat-card-title>Create Your Workspace</mat-card-title>
+      <mat-card-subtitle>Set up a new TeamForge workspace for your company</mat-card-subtitle>
+    </mat-card-header>
+
+    @if (authService.isLoading()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    <mat-card-content>
+      @if (authService.error()) {
+        <div class="error-message">{{ authService.error() }}</div>
+      }
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Company Name</mat-label>
+          <input matInput formControlName="companyName" placeholder="Acme Corp">
+          <mat-icon matSuffix>business</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Your Name</mat-label>
+          <input matInput formControlName="displayName" placeholder="Jane Doe">
+          <mat-icon matSuffix>person</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email">
+          <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password">
+          <mat-icon matSuffix>lock</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" class="full-width"
+                [disabled]="registerForm.invalid || authService.isLoading()">
+          Create Workspace
+        </button>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end">
+      <a mat-button routerLink="/login">Already have a workspace? Sign in</a>
+    </mat-card-actions>
+  </mat-card>
+</div>

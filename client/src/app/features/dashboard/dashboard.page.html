@@ -1,0 +1,64 @@
+<div class="page-container">
+  <h1>{{ themeService.companyName() }}</h1>
+  @if (themeService.tagLine()) {
+    <p class="tagline">{{ themeService.tagLine() }}</p>
+  }
+
+  @if (isLoading()) {
+    <div class="loading-spinner">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (data()) {
+    <!-- Stats Row -->
+    <div class="card-grid stats-grid">
+      <mat-card class="stat-card">
+        <div class="stat-value">{{ data()!.projectCount }}</div>
+        <div class="stat-label">Projects</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-value">{{ data()!.teamCount }}</div>
+        <div class="stat-label">Teams</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <div class="stat-value">{{ data()!.userCount }}</div>
+        <div class="stat-label">Members</div>
+      </mat-card>
+    </div>
+
+    <!-- Recent Projects -->
+    <h2>Recent Projects</h2>
+    <div class="card-grid">
+      @for (project of data()!.recentProjects; track project.id) {
+        <mat-card>
+          <mat-card-header>
+            <mat-icon mat-card-avatar>folder</mat-icon>
+            <mat-card-title>{{ project.name }}</mat-card-title>
+            <mat-card-subtitle>{{ project.category }} &middot; {{ project.status }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ project.description }}</p>
+          </mat-card-content>
+        </mat-card>
+      } @empty {
+        <p>No projects yet. <a routerLink="/projects">Create one!</a></p>
+      }
+    </div>
+
+    <!-- Announcements -->
+    <h2>Announcements</h2>
+    @for (announcement of data()!.recentAnnouncements; track announcement.id) {
+      <mat-card class="announcement-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar>campaign</mat-icon>
+          <mat-card-title>{{ announcement.title }}</mat-card-title>
+          <mat-card-subtitle>{{ announcement.createdByName }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ announcement.content }}</p>
+        </mat-card-content>
+      </mat-card>
+    } @empty {
+      <p>No announcements yet.</p>
+    }
+  }
+</div>
