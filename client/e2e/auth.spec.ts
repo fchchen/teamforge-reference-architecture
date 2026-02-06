@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication', () => {
   test.beforeEach(async ({ page }) => {
+    await page.goto('/login');
     await page.evaluate(() => localStorage.clear());
   });
 
