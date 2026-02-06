@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "TeamForge API",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/TeamForge.Api/bin/Debug/net8.0/TeamForge.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/TeamForge.Api",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "preLaunchTask": "build"
+    }
+  ]
+}
