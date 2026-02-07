@@ -322,6 +322,7 @@ public class AuthService : IAuthService
         var clientId = _config["AzureAd:ClientId"] ?? throw new InvalidOperationException("AzureAd:ClientId not configured");
         var audience = _config["AzureAd:Audience"] ?? $"api://{clientId}";
 
+        // Fetch OIDC metadata from v2.0 endpoint (signing keys are shared between v1/v2)
         var authority = $"{instance.TrimEnd('/')}/{tenantId}/v2.0";
         var metadataAddress = $"{authority}/.well-known/openid-configuration";
 
@@ -335,9 +336,14 @@ public class AuthService : IAuthService
         var validationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = $"{instance.TrimEnd('/')}/{tenantId}/v2.0",
+            // Accept both v1 (sts.windows.net) and v2 (login.microsoftonline.com) issuers
+            ValidIssuers = new[]
+            {
+                $"{instance.TrimEnd('/')}/{tenantId}/v2.0",
+                $"https://sts.windows.net/{tenantId}/"
+            },
             ValidateAudience = true,
-            ValidAudience = audience,
+            ValidAudiences = new[] { audience, clientId },
             ValidateIssuerSigningKey = true,
             IssuerSigningKeys = config.SigningKeys,
             ValidateLifetime = true

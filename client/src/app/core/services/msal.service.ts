@@ -14,8 +14,7 @@ export class MsalService {
         redirectUri: environment.azure.redirectUri
       },
       cache: {
-        cacheLocation: 'sessionStorage',
-        storeAuthStateInCookie: false
+        cacheLocation: 'sessionStorage'
       }
     });
     await this.msalInstance.initialize();
