@@ -382,6 +382,79 @@ Only rows matching the authenticated tenant are visible/writable
 
 ---
 
+## Why Shared Database + RLS? Benefits & Industry Adoption
+
+### Benefits of This Pattern
+
+**1. Defense-in-Depth**
+
+Without RLS, a single missing `.Where()` filter leaks all tenants' data:
+
+```csharp
+// Bug: forgot tenant filter — returns EVERY tenant's projects
+var projects = await _db.Projects.ToListAsync();
+```
+
+With RLS, that same bug is harmless — SQL Server silently filters to only the current tenant's rows. The database protects against application-level mistakes.
+
+**2. Cannot Be Bypassed by Application Code**
+
+RLS operates at the SQL engine level. Even raw SQL queries, stored procedures, or code written by a developer unaware of the tenant rules — all get filtered. There is no way for application code to accidentally read or write another tenant's data.
+
+**3. Simpler Queries**
+
+Without RLS, every query needs `.Where(x => x.TenantId == tenantId)`. With RLS, the database handles tenant filtering invisibly — queries can be written without explicitly thinking about isolation.
+
+**4. Single Database, Lower Cost**
+
+Alternative approaches require separate databases or schemas per tenant. RLS enables a single shared database for all tenants while still guaranteeing isolation, which is significantly cheaper to operate and maintain.
+
+### Multi-Tenant Architecture Patterns Comparison
+
+| Pattern | Example Users | Tradeoff |
+|---|---|---|
+| **Database-per-tenant** | Salesforce (large orgs) | Strongest isolation, highest cost and operational complexity |
+| **Schema-per-tenant** | Some legacy ERPs | Moderate isolation, complex migrations |
+| **Shared DB + RLS** (this repo) | Azure SaaS templates, Supabase, PostHog, Citus | Cost-effective, single schema, requires careful setup |
+
+### Industry Adoption
+
+- **Microsoft** — their official [Azure SaaS multi-tenant guidance](https://learn.microsoft.com/en-us/azure/azure-sql/database/saas-tenancy-app-design-patterns) recommends exactly this pattern with `SESSION_CONTEXT` + RLS for SQL Server
+- **Supabase** — built their entire multi-tenant auth model on PostgreSQL RLS
+- **PostgreSQL ecosystem** — Postgres RLS is widely adopted (same concept, different SQL flavor)
+- **Citus / Azure Cosmos DB for PostgreSQL** — RLS as a first-class multi-tenancy pattern
+
+### When This Pattern Is NOT the Right Choice
+
+- **Regulatory/compliance requirements** — some industries (healthcare, finance) mandate physical data separation, where RLS alone may not satisfy auditors
+- **Very large tenants with different performance needs** — noisy neighbor problem; one tenant's heavy queries can affect all others sharing the database
+- **Tenant-specific schema customizations** — RLS assumes all tenants share the same schema; if tenants need custom columns or tables, database-per-tenant is more appropriate
+
+### How TenantId Flows into Every Row
+
+TeamForge uses explicit TenantId assignment at the application layer combined with RLS enforcement at the database layer:
+
+1. **Controllers** extract `tenant_id` from JWT claims via a `GetTenantId()` helper
+2. **Every entity creation** explicitly sets `TenantId` on the new object:
+
+```csharp
+// Example from ProjectsController.cs
+var tenantId = GetTenantId();  // extracted from JWT claims
+var project = new Project
+{
+    TenantId = tenantId,       // explicitly set on every INSERT
+    Name = request.Name,
+    Description = request.Description,
+    Category = request.Category
+};
+```
+
+3. **RLS BLOCK predicates** act as a safety net — if application code ever attempts to insert a row with a TenantId that doesn't match the current `SESSION_CONTEXT`, SQL Server rejects the write
+
+There is no `SaveChangesAsync` override, no SQL DEFAULT constraint, no trigger, and no EF Core shadow property that auto-populates TenantId. The explicit-assignment approach ensures clarity and avoids subtle bugs where the wrong tenant context could silently propagate.
+
+---
+
 ## Source File Reference
 
 | File | Role |
