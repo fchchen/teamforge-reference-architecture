@@ -155,7 +155,7 @@ For a detailed walkthrough, see [Authentication Flow](docs/authentication-flow.m
 With both servers running, capture all screenshots automatically:
 
 ```bash
-cd client && npx playwright test e2e/screenshots.spec.ts
+cd client && npx playwright test e2e/screenshots.spec.ts --config=e2e/playwright.config.ts
 ```
 
 Output is saved to `docs/screenshots/`.
