@@ -32,9 +32,9 @@ Each tenant has its own branding — colors, fonts, and tagline customized via t
 
 ### API Documentation (Swagger)
 
-| API Overview | Auth Endpoints |
+| API Overview | Auth Login Endpoint Detail |
 |:---:|:---:|
-| ![Swagger Overview](docs/screenshots/11-swagger-overview.png) | ![Swagger Auth](docs/screenshots/12-swagger-auth-endpoints.png) |
+| ![Swagger Overview](docs/screenshots/11-swagger-overview.png) | ![Swagger Auth Login](docs/screenshots/12-swagger-auth-login-detail.png) |
 
 ## Features
 

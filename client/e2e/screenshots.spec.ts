@@ -147,17 +147,19 @@ test.describe('Screenshots — Swagger', () => {
     await screenshot(page, '11-swagger-overview');
   });
 
-  test('12 — Swagger Auth endpoints expanded', async ({ page }) => {
+  test('12 — Swagger Auth login endpoint expanded', async ({ page }) => {
     await page.goto('http://localhost:5210/swagger/index.html');
     await page.waitForSelector('.swagger-ui', { timeout: 10000 });
     await page.waitForTimeout(1000);
 
-    // Expand the Auth section
-    const authSection = page.locator('#operations-tag-Auth');
-    if (await authSection.isVisible().catch(() => false)) {
-      await authSection.click();
+    // Click the POST /api/v1/Auth/login endpoint to expand it
+    const loginEndpoint = page.locator('#operations-Auth-post_api_v1_Auth_login .opblock-summary');
+    if (await loginEndpoint.isVisible().catch(() => false)) {
+      await loginEndpoint.click();
       await page.waitForTimeout(500);
+      // Scroll to the expanded endpoint
+      await loginEndpoint.scrollIntoViewIfNeeded();
     }
-    await screenshot(page, '12-swagger-auth-endpoints');
+    await screenshot(page, '12-swagger-auth-login-detail');
   });
 });
