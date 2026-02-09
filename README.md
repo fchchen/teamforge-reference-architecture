@@ -2,6 +2,40 @@
 
 Multi-tenant SaaS project management platform with row-level security. .NET 8 API, Angular 17, SQL Server RLS, MS Entra ID SSO.
 
+## Screenshots
+
+### Login & Registration
+
+| Login Page | Register Page |
+|:---:|:---:|
+| ![Login](docs/screenshots/01-login.png) | ![Register](docs/screenshots/02-register.png) |
+
+### Multi-Tenant Dashboards (White-Labeling)
+
+Each tenant has its own branding — colors, fonts, and tagline customized via the Settings page.
+
+| Acme Corp | Pixel Studio | GreenLeaf Solutions |
+|:---:|:---:|:---:|
+| ![Acme Corp Dashboard](docs/screenshots/03-dashboard-acme.png) | ![Pixel Studio Dashboard](docs/screenshots/08-dashboard-pixel.png) | ![GreenLeaf Dashboard](docs/screenshots/10-dashboard-greenleaf.png) |
+
+### Project & Team Management
+
+| Projects | Teams |
+|:---:|:---:|
+| ![Projects](docs/screenshots/04-projects-acme.png) | ![Teams](docs/screenshots/05-teams-acme.png) |
+
+### Admin Settings & Navigation
+
+| Settings (Branding) | User Menu |
+|:---:|:---:|
+| ![Settings](docs/screenshots/06-settings-acme.png) | ![User Menu](docs/screenshots/07-user-menu-acme.png) |
+
+### API Documentation (Swagger)
+
+| API Overview | Auth Endpoints |
+|:---:|:---:|
+| ![Swagger Overview](docs/screenshots/11-swagger-overview.png) | ![Swagger Auth](docs/screenshots/12-swagger-auth-endpoints.png) |
+
 ## Features
 
 - **Multi-tenant isolation** with SQL Server row-level security (RLS) policies
@@ -115,6 +149,16 @@ For a detailed walkthrough, see [Authentication Flow](docs/authentication-flow.m
 
 - [Authentication & Authorization Flow](docs/authentication-flow.md) -- hybrid auth design, JWT structure, and RLS integration
 - [Enterprise Auth Best Practices](docs/enterprise-auth-practices.md) -- architectural guidance for secure multi-tenant SaaS applications
+
+### Regenerating Screenshots
+
+With both servers running, capture all screenshots automatically:
+
+```bash
+cd client && npx playwright test e2e/screenshots.spec.ts
+```
+
+Output is saved to `docs/screenshots/`.
 
 ## License
 
